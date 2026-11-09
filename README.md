@@ -6,9 +6,11 @@ switched automation on, sends everything else to a human, and logs every step in
 tamper-evident record. See [`docs/SPEC.md`](docs/SPEC.md) for the full specification
 and [`docs/PLAN.md`](docs/PLAN.md) for the milestone checklist.
 
-> **Status: M0 (scaffold).** The repository, services and tooling are in place;
-> decision logic (rules, model step, engine, API) lands in M1 onward. Endpoints
-> other than `/healthz` and `/readyz` are not implemented yet.
+> **Status: M1 (core definitions and rules).** The engine loads and validates
+> decision definitions, evaluates FEEL-lite rules, produces traces and hashes, and
+> ships the `adjudik validate` / `adjudik test` CLI. The model step and engine
+> (M2) and the server API (M3+) are not implemented yet; the server exposes only
+> `/healthz` and `/readyz`.
 
 ## Architecture
 
@@ -65,19 +67,36 @@ Load demo data once the engine exists (M3b onward):
 make seed
 ```
 
-### Using the core library (available from M1)
+### Using the core library
 
 ```python
-import random
-from adjudik_core import Engine, EvaluationContext, load_definition
-from adjudik_core.providers import build_providers
+from adjudik_core import load_definition
 
-defn = load_definition("examples/refund_approval/decision.yaml")
-engine = Engine(providers=build_providers(), rng=random.Random())
-# result = engine.evaluate(defn, input_data, policy=None)
+compiled = load_definition("examples/refund_approval/decision.yaml")
+case = {
+    "order": {
+        "id": "A-1",
+        "amount": 10.0,
+        "currency": "USD",
+        "status": "cancelled",
+        "days_since_delivery": None,
+    },
+    "customer": {"id": "C", "tier": "standard", "refunds_last_90d": 0},
+    "request": {"reason_text": "cancelled before shipping"},
+}
+compiled.validate_input(case)
+result, trace = compiled.evaluate_rules(case)
+print(result.type, result.outcome)  # decide approve
 ```
 
-The built-in `demo` provider needs no API key, so the quickstart runs offline.
+Or from the CLI (no API key needed):
+
+```bash
+adjudik validate examples/refund_approval/decision.yaml
+adjudik test examples/refund_approval/decision.yaml --cases examples/refund_approval/cases.jsonl
+```
+
+The model step (`Engine.evaluate`, the built-in `demo` provider) lands in M2.
 
 ## Development
 

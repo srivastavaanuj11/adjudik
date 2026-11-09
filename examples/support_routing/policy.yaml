@@ -1,0 +1,2 @@
+thresholds: {billing: 0.95, technical: 0.95, account: 0.95, shipping: 0.95, other: null}
+audit_sample_rate: 0.05

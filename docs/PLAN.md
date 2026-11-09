@@ -22,15 +22,15 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
 - [x] CI runs lint, types, security scanning and tests on PRs, actions pinned to SHAs (workflow committed; runs on first push to GitHub).
 - [x] import-linter contract forbids `adjudik_core` importing `django`, `rest_framework`, `celery` (contract + subprocess test, both green).
 
-## M1 — Core definitions and rules  (SPEC §5, §6)
+## M1 — Core definitions and rules  (SPEC §5, §6)  — COMPLETE
 
-- [ ] Pydantic models for schema version 1; `schemas/decision-definition.schema.json` generated + committed; CI fails if stale.
-- [ ] Input limits (§5.6), alias-rejecting YAML loader, every §5.7 rule except rule 11 — each tested, with a JSON Pointer path.
-- [ ] FEEL-lite per §6.2/§6.3 incl. every golden string and property tests.
-- [ ] Hit policies, nullability, conflicts (§6.1/§6.4); trace (§6.5).
-- [ ] `definition_hash`, `rules_hash`; JCS canonical JSON passing committed vectors.
-- [ ] `adjudik validate` and `adjudik test` (rules only) pass on both examples; refund `cases.jsonl` ≥ 15 cases.
-- [ ] Core coverage ≥ 90%.
+- [x] Pydantic models for schema version 1; `schemas/decision-definition.schema.json` generated + committed; CI fails if stale (test_schema_committed.py).
+- [x] Input limits (§5.6), alias-rejecting YAML loader, every §5.7 rule except rule 11 — each tested, with a JSON Pointer path.
+- [x] FEEL-lite per §6.2/§6.3 incl. every golden string and property tests.
+- [x] Hit policies, nullability, conflicts (§6.1/§6.4); trace (§6.5, exact match test).
+- [x] `definition_hash`, `rules_hash`; JCS canonical JSON passing committed vectors.
+- [x] `adjudik validate` and `adjudik test` (rules only) pass on both examples; refund `cases.jsonl` = 17 cases.
+- [x] Core coverage 93% (≥ 90%).
 
 ## M2 — Core model step and engine  (SPEC §7, §8.2)
 

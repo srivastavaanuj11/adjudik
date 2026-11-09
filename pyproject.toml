@@ -39,6 +39,10 @@ src = ["packages/core/src", "server"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "C4", "SIM"]
 
+[tool.ruff.lint.per-file-ignores]
+# Typer requires Option()/Argument() calls in parameter defaults.
+"packages/core/src/adjudik_core/cli/*" = ["B008"]
+
 [tool.mypy]
 python_version = "3.12"
 warn_unused_configs = true

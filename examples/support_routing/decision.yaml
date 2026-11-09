@@ -1,0 +1,82 @@
+schema_version: "1"
+key: support_routing
+name: Support ticket routing
+description: Route an incoming support ticket to one of five queues.
+
+input_schema:
+  type: object
+  additionalProperties: false
+  required: [ticket]
+  properties:
+    ticket:
+      type: object
+      additionalProperties: false
+      required: [id, subject, body, form, plan]
+      properties:
+        id: {type: string, maxLength: 64}
+        subject: {type: string, maxLength: 300}
+        body: {type: string, maxLength: 8000}
+        form: {type: string, enum: [contact, refund_form, bug_report, password_reset]}
+        plan: {type: string, enum: [free, pro, enterprise]}
+
+outcomes:
+  - {id: billing, label: Billing, description: "Payments, invoices and refunds."}
+  - {id: technical, label: Technical, description: "Bugs and product defects."}
+  - {id: account, label: Account, description: "Login, password and account access."}
+  - {id: shipping, label: Shipping, description: "Delivery and logistics."}
+  - {id: other, label: Other, description: "Anything that fits no other queue."}
+
+rules:
+  hit_policy: FIRST
+  on_no_match: model
+  inputs:
+    - {id: form, expr: ticket.form}
+    - {id: plan, expr: ticket.plan}
+  rows:
+    - id: refund_form
+      when: {form: '"refund_form"'}
+      then: {action: decide, outcome: billing}
+      note: Refund forms are always billing.
+    - id: bug_report
+      when: {form: '"bug_report"'}
+      then: {action: decide, outcome: technical}
+      note: Bug reports go to technical.
+    - id: password_reset
+      when: {form: '"password_reset"'}
+      then: {action: decide, outcome: account}
+      note: Password resets go to account.
+    - id: enterprise_contact
+      when: {form: '"contact"', plan: '"enterprise"'}
+      then: {action: review}
+      note: Enterprise contact forms get a human first.
+
+model_step:
+  provider: anthropic
+  model: claude-haiku-5-5
+  temperature: 0
+  max_output_tokens: 600
+  include_fields:
+    - ticket.subject
+    - ticket.body
+    - ticket.plan
+  confidence: {method: verbalized}
+  policy: |
+    Read the ticket subject and body and choose the single best queue.
+    billing: payments, invoices, charges, refunds, subscription changes.
+    technical: errors, crashes, bugs, broken features, integration problems.
+    account: sign-in, password, access, profile and permission issues.
+    shipping: delivery status, lost or delayed parcels, address changes.
+    other: anything that fits none of the above.
+
+routing:
+  always_review_outcomes: []
+  subject_key: [ticket.id]
+  resubmission_window_days: 30
+
+review:
+  sla_minutes: 240
+  claim_lease_minutes: 15
+  reason_codes:
+    - {id: clear_match, label: Clear queue match}
+    - {id: ambiguous, label: Ambiguous ticket}
+    - {id: other, label: Other}

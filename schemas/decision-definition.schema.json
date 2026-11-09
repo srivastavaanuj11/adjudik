@@ -1,0 +1,451 @@
+{
+  "$defs": {
+    "Confidence": {
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "default": "verbalized",
+          "enum": [
+            "verbalized",
+            "self_consistency"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "sample_temperature": {
+          "default": 1.0,
+          "maximum": 2,
+          "minimum": 0.1,
+          "title": "Sample Temperature",
+          "type": "number"
+        },
+        "samples": {
+          "default": 5,
+          "maximum": 10,
+          "minimum": 3,
+          "title": "Samples",
+          "type": "integer"
+        }
+      },
+      "title": "Confidence",
+      "type": "object"
+    },
+    "ModelStep": {
+      "additionalProperties": false,
+      "properties": {
+        "confidence": {
+          "$ref": "#/$defs/Confidence"
+        },
+        "include_fields": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Include Fields",
+          "type": "array"
+        },
+        "injection_screen": {
+          "default": true,
+          "title": "Injection Screen",
+          "type": "boolean"
+        },
+        "max_output_tokens": {
+          "default": 600,
+          "maximum": 4096,
+          "minimum": 64,
+          "title": "Max Output Tokens",
+          "type": "integer"
+        },
+        "max_repair_attempts": {
+          "default": 1,
+          "maximum": 2,
+          "minimum": 0,
+          "title": "Max Repair Attempts",
+          "type": "integer"
+        },
+        "max_retries": {
+          "default": 2,
+          "maximum": 3,
+          "minimum": 0,
+          "title": "Max Retries",
+          "type": "integer"
+        },
+        "model": {
+          "minLength": 1,
+          "title": "Model",
+          "type": "string"
+        },
+        "policy": {
+          "maxLength": 20000,
+          "minLength": 1,
+          "title": "Policy",
+          "type": "string"
+        },
+        "provider": {
+          "minLength": 1,
+          "title": "Provider",
+          "type": "string"
+        },
+        "temperature": {
+          "anyOf": [
+            {
+              "maximum": 2,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Temperature"
+        },
+        "timeout_s": {
+          "default": 20,
+          "maximum": 60,
+          "minimum": 1,
+          "title": "Timeout S",
+          "type": "number"
+        }
+      },
+      "required": [
+        "provider",
+        "model",
+        "include_fields",
+        "policy"
+      ],
+      "title": "ModelStep",
+      "type": "object"
+    },
+    "Outcome": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_]{0,31}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "Outcome",
+      "type": "object"
+    },
+    "ReasonCode": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_]{0,31}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "ReasonCode",
+      "type": "object"
+    },
+    "Review": {
+      "additionalProperties": false,
+      "properties": {
+        "claim_lease_minutes": {
+          "default": 15,
+          "maximum": 120,
+          "minimum": 2,
+          "title": "Claim Lease Minutes",
+          "type": "integer"
+        },
+        "reason_codes": {
+          "items": {
+            "$ref": "#/$defs/ReasonCode"
+          },
+          "maxItems": 30,
+          "title": "Reason Codes",
+          "type": "array"
+        },
+        "sla_minutes": {
+          "default": 240,
+          "maximum": 43200,
+          "minimum": 5,
+          "title": "Sla Minutes",
+          "type": "integer"
+        }
+      },
+      "title": "Review",
+      "type": "object"
+    },
+    "Routing": {
+      "additionalProperties": false,
+      "properties": {
+        "always_review_outcomes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Always Review Outcomes",
+          "type": "array"
+        },
+        "resubmission_window_days": {
+          "default": 30,
+          "maximum": 365,
+          "minimum": 0,
+          "title": "Resubmission Window Days",
+          "type": "integer"
+        },
+        "subject_key": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Subject Key",
+          "type": "array"
+        }
+      },
+      "title": "Routing",
+      "type": "object"
+    },
+    "RuleInput": {
+      "additionalProperties": false,
+      "properties": {
+        "expr": {
+          "minLength": 1,
+          "title": "Expr",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_]{0,31}$",
+          "title": "Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "expr"
+      ],
+      "title": "RuleInput",
+      "type": "object"
+    },
+    "RuleRow": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9_]{1,64}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "maxLength": 500,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        },
+        "then": {
+          "$ref": "#/$defs/RuleThen"
+        },
+        "when": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "When",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "then"
+      ],
+      "title": "RuleRow",
+      "type": "object"
+    },
+    "RuleThen": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "enum": [
+            "decide",
+            "review",
+            "model"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "outcome": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outcome"
+        }
+      },
+      "required": [
+        "action"
+      ],
+      "title": "RuleThen",
+      "type": "object"
+    },
+    "Rules": {
+      "additionalProperties": false,
+      "properties": {
+        "hit_policy": {
+          "default": "FIRST",
+          "enum": [
+            "FIRST",
+            "UNIQUE",
+            "ANY"
+          ],
+          "title": "Hit Policy",
+          "type": "string"
+        },
+        "inputs": {
+          "items": {
+            "$ref": "#/$defs/RuleInput"
+          },
+          "maxItems": 30,
+          "minItems": 1,
+          "title": "Inputs",
+          "type": "array"
+        },
+        "on_no_match": {
+          "default": "model",
+          "enum": [
+            "model",
+            "review"
+          ],
+          "title": "On No Match",
+          "type": "string"
+        },
+        "rows": {
+          "items": {
+            "$ref": "#/$defs/RuleRow"
+          },
+          "maxItems": 500,
+          "minItems": 1,
+          "title": "Rows",
+          "type": "array"
+        }
+      },
+      "required": [
+        "inputs",
+        "rows"
+      ],
+      "title": "Rules",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "description": {
+      "default": "",
+      "maxLength": 2000,
+      "title": "Description",
+      "type": "string"
+    },
+    "input_schema": {
+      "additionalProperties": true,
+      "title": "Input Schema",
+      "type": "object"
+    },
+    "key": {
+      "pattern": "^[a-z][a-z0-9_]{2,63}$",
+      "title": "Key",
+      "type": "string"
+    },
+    "model_step": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ModelStep"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "name": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "outcomes": {
+      "items": {
+        "$ref": "#/$defs/Outcome"
+      },
+      "maxItems": 20,
+      "minItems": 2,
+      "title": "Outcomes",
+      "type": "array"
+    },
+    "review": {
+      "$ref": "#/$defs/Review"
+    },
+    "routing": {
+      "$ref": "#/$defs/Routing"
+    },
+    "rules": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Rules"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "schema_version": {
+      "const": "1",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "key",
+    "name",
+    "input_schema",
+    "outcomes"
+  ],
+  "title": "Adjudik decision definition (schema version 1)",
+  "type": "object"
+}

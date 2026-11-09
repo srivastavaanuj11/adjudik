@@ -1,0 +1,119 @@
+{
+  "_comment": "RFC 8785 (JCS) canonical JSON + chain-hash test vectors (SPEC \u00a79.2). Regenerate with scripts; committed and checked by core tests.",
+  "canonical": [
+    {
+      "name": "empty_object",
+      "value": {},
+      "canonical": "{}",
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "name": "key_sorting",
+      "value": {
+        "b": 1,
+        "a": 2
+      },
+      "canonical": "{\"a\":2,\"b\":1}",
+      "sha256": "d3626ac30a87e6f7a6428233b3c68299976865fa5508e4267c5415c76af7a772"
+    },
+    {
+      "name": "nested_sorting",
+      "value": {
+        "z": {
+          "d": 4,
+          "c": 3
+        },
+        "a": [
+          3,
+          2,
+          1
+        ]
+      },
+      "canonical": "{\"a\":[3,2,1],\"z\":{\"c\":3,\"d\":4}}",
+      "sha256": "1f7bfe11a1965d9cc93edc65f511cfd0927acde6b2519eac1d1685723ddddc4b"
+    },
+    {
+      "name": "number_forms",
+      "value": {
+        "i": 120,
+        "f": 120.0,
+        "neg": -5,
+        "frac": 1.5
+      },
+      "canonical": "{\"f\":120,\"frac\":1.5,\"i\":120,\"neg\":-5}",
+      "sha256": "a58d15706b995341ede60b09b575f945afd8a7655539b7fd0da6c97c435d14b4"
+    },
+    {
+      "name": "types",
+      "value": {
+        "s": "x",
+        "t": true,
+        "f": false,
+        "n": null
+      },
+      "canonical": "{\"f\":false,\"n\":null,\"s\":\"x\",\"t\":true}",
+      "sha256": "6d283910f0e0790b65d046a4a1defef5739a6da7d9647f313181af7c4c1639e3"
+    },
+    {
+      "name": "unicode",
+      "value": {
+        "msg": "h\u00e9llo w\u00f6rld"
+      },
+      "canonical": "{\"msg\":\"h\u00e9llo w\u00f6rld\"}",
+      "sha256": "53a6c8e0106256175556dfe129e5a14bde1e1827b50f7d553c0a352f1e573b95"
+    },
+    {
+      "name": "refund_trace_columns",
+      "value": {
+        "status": "delivered",
+        "days": 4,
+        "amount": 120.0,
+        "tier": "standard",
+        "prior_refunds": 0,
+        "reason": "not_as_described"
+      },
+      "canonical": "{\"amount\":120,\"days\":4,\"prior_refunds\":0,\"reason\":\"not_as_described\",\"status\":\"delivered\",\"tier\":\"standard\"}",
+      "sha256": "eb3900bfa61ad953f558c746546cad380d0a62ba14890e876933280dd394a77a"
+    }
+  ],
+  "chain": [
+    {
+      "name": "seq1",
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "event": {
+        "seq": 1,
+        "workspace_id": "11111111-1111-1111-1111-111111111111",
+        "event_type": "evaluation.received",
+        "occurred_at": "2026-01-02T03:04:05.000000Z",
+        "actor_type": "api_key",
+        "actor_id": "k1",
+        "evaluation_id": "22222222-2222-2222-2222-222222222222",
+        "subject_type": null,
+        "subject_id": null,
+        "payload": {
+          "decision_key": "refund_approval"
+        }
+      },
+      "hash": "21d3ed9e9d28d24c4c944c693b327b9491475172c3350fd578649b01fb8fd15f"
+    },
+    {
+      "name": "seq2",
+      "prev_hash": "21d3ed9e9d28d24c4c944c693b327b9491475172c3350fd578649b01fb8fd15f",
+      "event": {
+        "seq": 2,
+        "workspace_id": "11111111-1111-1111-1111-111111111111",
+        "event_type": "rules.evaluated",
+        "occurred_at": "2026-01-02T03:04:05.100000Z",
+        "actor_type": "system",
+        "actor_id": null,
+        "evaluation_id": "22222222-2222-2222-2222-222222222222",
+        "subject_type": null,
+        "subject_id": null,
+        "payload": {
+          "result": "no_match"
+        }
+      },
+      "hash": "98250b7b882e0803f4e9cbc3722ba93adb14de8bf4abdc8414915566766007f7"
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+schema_version: "1"
+key: refund_approval
+name: Refund approval
+description: Approve or deny customer refund requests for online orders.
+
+input_schema:
+  type: object
+  additionalProperties: false
+  required: [order, customer, request]
+  properties:
+    order:
+      type: object
+      additionalProperties: false
+      required: [id, amount, currency, status, days_since_delivery]
+      properties:
+        id: {type: string, maxLength: 64}
+        amount: {type: number, minimum: 0}
+        currency: {type: string, enum: [USD, EUR, INR]}
+        status: {type: string, enum: [delivered, in_transit, cancelled]}
+        days_since_delivery: {type: [integer, "null"], minimum: 0}
+    customer:
+      type: object
+      additionalProperties: false
+      required: [id, tier, refunds_last_90d]
+      properties:
+        id: {type: string, maxLength: 64}
+        tier: {type: string, enum: [standard, gold]}
+        refunds_last_90d: {type: integer, minimum: 0}
+    request:
+      type: object
+      additionalProperties: false
+      required: [reason_text]
+      properties:
+        reason_code: {type: string, enum: [damaged, wrong_item, not_as_described, changed_mind, late, other]}
+        reason_text: {type: string, maxLength: 4000}
+
+outcomes:
+  - {id: approve, label: Approve refund, description: Refund the full order amount.}
+  - {id: deny, label: Deny refund, description: Refuse the refund; the customer keeps the item.}
+
+rules:
+  hit_policy: FIRST
+  on_no_match: model
+  inputs:
+    - {id: status, expr: order.status}
+    - {id: days, expr: order.days_since_delivery}
+    - {id: amount, expr: order.amount}
+    - {id: tier, expr: customer.tier}
+    - {id: prior_refunds, expr: customer.refunds_last_90d}
+    - {id: reason, expr: request.reason_code}
+  rows:
+    - id: cancelled_order
+      when: {status: '"cancelled"'}
+      then: {action: decide, outcome: approve}
+      note: Cancelled before shipping, always refund.
+    - id: outside_window
+      when: {days: "> 30"}
+      then: {action: decide, outcome: deny}
+      note: Refund window is 30 days from delivery.
+    - id: high_value
+      when: {amount: "> 500"}
+      then: {action: review}
+      note: Refunds above 500 need a human.
+    - id: frequent_refunder
+      when: {prior_refunds: ">= 3"}
+      then: {action: review}
+      note: Three or more refunds in 90 days need a human.
+    - id: small_gold_damaged
+      when: {tier: '"gold"', amount: "<= 50", reason: '"damaged", "wrong_item"'}
+      then: {action: decide, outcome: approve}
+
+model_step:
+  provider: anthropic
+  model: claude-haiku-5-5
+  temperature: 0
+  max_output_tokens: 600
+  include_fields:
+    - order.amount
+    - order.currency
+    - order.status
+    - order.days_since_delivery
+    - customer.tier
+    - customer.refunds_last_90d
+    - request.reason_code
+    - request.reason_text
+  confidence: {method: verbalized}
+  policy: |
+    Approve when the customer reports the item arrived damaged, defective, wrong,
+    or materially different from the listing, and the description is specific and
+    plausible. Approve change-of-mind requests only if the customer says the item is
+    unopened. Deny when the text admits the item was used and works as described, or
+    when the reason is vague.
+
+routing:
+  always_review_outcomes: []
+  subject_key: [order.id]
+  resubmission_window_days: 30
+
+review:
+  sla_minutes: 240
+  claim_lease_minutes: 15
+  reason_codes:
+    - {id: evidence_supports, label: Evidence supports the claim}
+    - {id: evidence_contradicts, label: Evidence contradicts the claim}
+    - {id: policy_window, label: Outside policy window}
+    - {id: item_used, label: Item used or opened}
+    - {id: other, label: Other}

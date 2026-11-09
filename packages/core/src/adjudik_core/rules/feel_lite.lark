@@ -1,0 +1,20 @@
+?cell          : "-"                              -> any
+               | "not" "(" positive_list ")"      -> negation
+               | positive_list
+positive_list  : positive ("," positive)*
+?positive      : comparison | interval | literal | null
+comparison     : CMP value
+CMP            : "<=" | ">=" | "!=" | "<" | ">" | "="
+interval       : open number ".." number close
+!open          : "[" | "(" | "]"
+!close         : "]" | ")" | "["
+?value         : number | string | boolean
+?literal       : number | string | boolean
+null           : "null"
+number         : NUMBER
+NUMBER         : /-?(0|[1-9][0-9]*)(\.[0-9]+)?/
+string         : ESCAPED_STRING
+!boolean       : "true" | "false"
+%import common.ESCAPED_STRING
+%import common.WS
+%ignore WS

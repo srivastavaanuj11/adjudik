@@ -1,0 +1,2 @@
+thresholds: {approve: 0.95, deny: 0.99}
+audit_sample_rate: 0.05
