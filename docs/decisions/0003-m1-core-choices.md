@@ -26,6 +26,9 @@ format and hashes follow the spec exactly.
    (both from SPEC §16.7 / §6.4); `no_match` with `on_no_match: review` →
    `no_match_review`; cases reaching the model are `skipped` without
    `--with-model`. These route-reason tokens are reused by the server in M3.
+   **Superseded in part by ADR 0004:** once the engine existed in M2 the
+   no-match route reason was reconciled to `no_rule_matched` (SPEC §8.2);
+   `rule_forced_review` and `rule_conflict` are unchanged.
 3. **AST is immutable and parse is cached** (`lru_cache`), and compiled
    definitions are cached by `definition_hash` (LRU 128) per §4.5.
 4. **JSON Schema export** is generated from the Pydantic models with sorted keys

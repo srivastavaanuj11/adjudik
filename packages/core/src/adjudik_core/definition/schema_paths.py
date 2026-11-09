@@ -15,6 +15,7 @@ __all__ = [
     "UnsupportedColumnSchema",
     "resolve_path_schema",
     "column_type_and_nullable",
+    "deref",
 ]
 
 SCALAR_TYPES = {"string", "number", "integer", "boolean"}
@@ -50,6 +51,11 @@ def _deref(schema: Any, root: dict[str, Any]) -> Any:
         seen.add(id(node))
         schema = node
     return schema
+
+
+def deref(schema: Any, root: dict[str, Any]) -> Any:
+    """Public wrapper: follow local ``#/$defs/...`` refs to a concrete node."""
+    return _deref(schema, root)
 
 
 def resolve_path_schema(root: dict[str, Any], path: str) -> PathResolution:

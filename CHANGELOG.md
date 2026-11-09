@@ -6,6 +6,32 @@ pre-1.0 and versioned by milestone (SPEC §17).
 
 ## [Unreleased]
 
+### M2 — Core model step and engine
+
+- Provider interface and providers (SPEC §7.1-§7.2): `anthropic` (Messages API,
+  structured output), `openai_compatible` (Chat Completions, `json_schema` /
+  `json_object` / `none`), the `fake` test double, and the deterministic
+  `keyword_fake` demo provider with its exact scoring formula. `build_providers`
+  reads `ADJUDIK_PROVIDERS`; SDKs are imported lazily and tested over mocked HTTP.
+- Data minimisation and the prompt-injection screen (SPEC §7.3-§7.4): untrusted
+  strings scanned with the five fixed patterns; any hit gates with
+  `suspected_injection` before the model is called.
+- Prompt builder with `PROMPT_VERSION` (SPEC §7.5) and the output contract (§7.6):
+  case data is escaped so it can never close `<case_data>`; the provider-safe
+  schema drops `minimum`/`maximum`/`maxLength` and restates them in descriptions.
+- Parsing, fixed error codes, repairs, transport retries with jittered backoff,
+  monotonic deadline, a 15-request cap and abort (SPEC §7.6-§7.8), with injectable
+  sleep and clock; `NaN`/`Infinity` confidence is rejected and ends in a gate.
+- Confidence estimation (SPEC §7.9): `verbalized` and `self_consistency` (samples
+  run concurrently; ties break on definition order; too few valid samples fail).
+- The model-step fingerprint (SPEC §7.11) with a golden test on the refund example.
+- `Engine` wiring the whole lifecycle — rules, minimisation, pre-model gates,
+  model step and routing exactly per SPEC §8.2 (blind draws, label propensities,
+  model mismatch, audit sampling), with seeded randomness — plus `AutomationPolicy`
+  and `EvaluationContext`, emitting the §9.4 audit events. `Engine.evaluate` runs
+  end to end with `--provider demo` and no API key.
+- CLI: `render-prompt` and `test --with-model [--policy] [--provider]` (SPEC §16.7).
+
 ### M1 — Core definitions and rules
 
 - Pydantic models for decision definitions, schema version 1 (SPEC §5.1-§5.5),

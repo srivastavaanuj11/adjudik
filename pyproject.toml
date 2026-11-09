@@ -29,6 +29,10 @@ dev = [
     "mypy>=1.11",
     "import-linter>=2.0",
     "pip-audit>=2.7",
+    # Provider SDKs are runtime-optional extras of `adjudik`, but the model-step
+    # provider tests drive them over mocked HTTP, so CI installs them here.
+    "anthropic>=1.0,<2",
+    "openai>=1.50,<3",
 ]
 
 [tool.ruff]

@@ -32,15 +32,16 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
 - [x] `adjudik validate` and `adjudik test` (rules only) pass on both examples; refund `cases.jsonl` = 17 cases.
 - [x] Core coverage 93% (≥ 90%).
 
-## M2 — Core model step and engine  (SPEC §7, §8.2)
+## M2 — Core model step and engine  (SPEC §7, §8.2)  — COMPLETE
 
-- [ ] Providers per §7.2, mocked HTTP only, incl. `keyword_fake` formula.
-- [ ] Minimisation, injection screen (±1 test per rule), built-in prompt golden test; `</case_data>` escaped.
-- [ ] Parsing, error codes, repairs, retries, deadline, request cap, abort (§7.6–§7.8); `NaN` confidence → gate.
-- [ ] `verbalized` and `self_consistency` (§7.9) incl. ties and too-few samples.
-- [ ] Routing per §8.2 incl. blind draws, label propensities, pre-model gates, model mismatch; seeded RNG.
-- [ ] Fingerprint (§7.11) golden test.
-- [ ] `Engine.evaluate` end to end with `--provider demo`; README quickstart runs with no API key; `render-prompt`, `test --with-model --policy`.
+- [x] Providers per §7.2, mocked HTTP only (`httpx`/`httpx2` MockTransport), incl. `keyword_fake` formula.
+- [x] Minimisation, injection screen (±1 test per rule), built-in prompt golden test; `</case_data>` escaped.
+- [x] Parsing, error codes, repairs, retries, deadline, request cap, abort (§7.6–§7.8); `NaN` confidence → gate.
+- [x] `verbalized` and `self_consistency` (§7.9) incl. ties and too-few samples.
+- [x] Routing per §8.2 incl. blind draws, label propensities, pre-model gates, model mismatch; seeded RNG.
+- [x] Fingerprint (§7.11) golden test.
+- [x] `Engine.evaluate` end to end with `--provider demo`; README quickstart runs with no API key; `render-prompt`, `test --with-model --policy`.
+- [x] Core coverage 94% (≥ 90%); full suite 227 tests green; ruff/mypy-strict/import-linter clean.
 
 ## M3a — Server foundation  (SPEC §9–§11, §15)
 

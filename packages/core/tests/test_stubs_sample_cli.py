@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
 from typer.testing import CliRunner
 
 from adjudik_core import Engine, sample_input
@@ -12,11 +11,11 @@ from adjudik_core.providers import build_providers
 runner = CliRunner()
 
 
-def test_m2_stubs_raise() -> None:
-    with pytest.raises(NotImplementedError):
-        Engine()
-    with pytest.raises(NotImplementedError):
-        build_providers()
+def test_engine_and_providers_are_available() -> None:
+    providers = build_providers()
+    assert "demo" in providers
+    engine = Engine(providers=providers)
+    assert engine.providers is providers
 
 
 def test_sample_input_respects_const_enum_min_and_arrays() -> None:

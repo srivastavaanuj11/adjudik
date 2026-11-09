@@ -6,11 +6,13 @@ switched automation on, sends everything else to a human, and logs every step in
 tamper-evident record. See [`docs/SPEC.md`](docs/SPEC.md) for the full specification
 and [`docs/PLAN.md`](docs/PLAN.md) for the milestone checklist.
 
-> **Status: M1 (core definitions and rules).** The engine loads and validates
-> decision definitions, evaluates FEEL-lite rules, produces traces and hashes, and
-> ships the `adjudik validate` / `adjudik test` CLI. The model step and engine
-> (M2) and the server API (M3+) are not implemented yet; the server exposes only
-> `/healthz` and `/readyz`.
+> **Status: M2 (core model step and engine).** The core loads and validates
+> decision definitions, evaluates FEEL-lite rules, runs the LLM model step
+> (providers, minimisation, injection screen, prompt, parsing, repairs, retries
+> and confidence estimation), and routes every case per the spec — all
+> framework-free, with a deterministic `demo` provider. The CLI adds
+> `render-prompt` and `test --with-model`. The server API (M3+) is not
+> implemented yet; the server exposes only `/healthz` and `/readyz`.
 
 ## Architecture
 
@@ -69,34 +71,58 @@ make seed
 
 ### Using the core library
 
-```python
-from adjudik_core import load_definition
+The whole lifecycle — rules, model step and routing — runs through `Engine`. The
+built-in `demo` provider is deterministic and needs no API key:
 
-compiled = load_definition("examples/refund_approval/decision.yaml")
+```python
+import random
+
+from adjudik_core import Engine, load_definition
+from adjudik_core.providers import build_providers
+
+defn = load_definition("examples/refund_approval/decision.yaml")
+engine = Engine(providers=build_providers(), rng=random.Random(0))
+
+# A case the rules hand to the model (mid-value, not covered by a row):
 case = {
-    "order": {
-        "id": "A-1",
-        "amount": 10.0,
-        "currency": "USD",
-        "status": "cancelled",
-        "days_since_delivery": None,
-    },
-    "customer": {"id": "C", "tier": "standard", "refunds_last_90d": 0},
-    "request": {"reason_text": "cancelled before shipping"},
+    "order": {"id": "A-12", "amount": 120.0, "currency": "USD",
+              "status": "delivered", "days_since_delivery": 4},
+    "customer": {"id": "C-12", "tier": "standard", "refunds_last_90d": 0},
+    "request": {"reason_code": "damaged",
+                "reason_text": "the item arrived damaged and broken"},
 }
-compiled.validate_input(case)
-result, trace = compiled.evaluate_rules(case)
-print(result.type, result.outcome)  # decide approve
+
+result = engine.evaluate(defn, case, provider_override="demo")
+print(result.status)                       # needs_review (no automation policy)
+print(result.route_reason)                 # automation_disabled
+print(result.review.suggested_outcome)     # approve
 ```
 
-Or from the CLI (no API key needed):
+With an admin-approved automation policy whose threshold the model's confidence
+meets, the same case is auto-decided:
+
+```python
+from adjudik_core import AutomationPolicy
+
+policy = AutomationPolicy(thresholds={"approve": 0.5, "deny": 0.5}, audit_sample_rate=0.05)
+result = engine.evaluate(defn, case, policy=policy, provider_override="demo")
+print(result.status, result.decided_by)    # decided model
+```
+
+Rule-decided cases never call the model, and `result.events` holds the audit
+events (SPEC §9.4) for the run.
+
+From the CLI (no API key needed with `--provider demo`):
 
 ```bash
 adjudik validate examples/refund_approval/decision.yaml
-adjudik test examples/refund_approval/decision.yaml --cases examples/refund_approval/cases.jsonl
+adjudik test examples/refund_approval/decision.yaml --cases examples/refund_approval/cases.jsonl --with-model --provider demo
+adjudik render-prompt examples/refund_approval/decision.yaml --input case.json
 ```
 
-The model step (`Engine.evaluate`, the built-in `demo` provider) lands in M2.
+Real providers (`anthropic`, `openai_compatible`) are configured through the
+`ADJUDIK_PROVIDERS` environment variable and read their keys from the environment;
+install the matching extra (`pip install adjudik[anthropic]`).
 
 ## Development
 
