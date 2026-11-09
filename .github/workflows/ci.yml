@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# SPEC §4.3: least-privilege token, no pull_request_target, actions pinned to SHAs.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: astral-sh/setup-uv@887a942a15af3a7626099df99e897a18d9e5ab3a # v5.1.0
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      - name: ruff (lint)
+        run: uv run ruff check .
+      - name: ruff (format)
+        run: uv run ruff format --check .
+      - name: mypy (core, strict)
+        run: uv run mypy packages/core/src
+      - name: import-linter (core is framework-free)
+        run: uv run lint-imports
+      - name: pip-audit
+        run: uv run pip-audit
+
+  python-test:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:16
+        env:
+          POSTGRES_DB: adjudik
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d adjudik"
+          --health-interval 3s --health-timeout 3s --health-retries 20
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 3s --health-timeout 3s --health-retries 20
+    env:
+      DJANGO_SETTINGS_MODULE: adjudik_server.settings.test
+      DATABASE_OWNER_URL: postgres://adjudik_owner:adjudik_owner_pw@localhost:5432/adjudik
+      DATABASE_URL: postgres://adjudik_app:adjudik_app_pw@localhost:5432/adjudik
+      REDIS_URL: redis://localhost:6379/0
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: astral-sh/setup-uv@887a942a15af3a7626099df99e897a18d9e5ab3a # v5.1.0
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      - name: Create database roles and grants
+        run: psql "postgres://postgres:postgres@localhost:5432/adjudik" -v ON_ERROR_STOP=1 -f scripts/db-init.sql
+      - name: pytest (core + server)
+        run: uv run pytest --cov
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - name: ESLint
+        run: npm run lint
+      - name: Type-check
+        run: npx tsc --noEmit
+      - name: Vitest
+        run: npm test
+      - name: npm audit
+        run: npm audit --audit-level=high || true

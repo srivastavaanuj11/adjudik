@@ -1,0 +1,32 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "adjudik"
+version = "0.0.0"
+description = "Adjudik decision engine core: definitions, rules, model step, routing, audit — framework-free."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = "Apache-2.0"
+authors = [{ name = "Anuj" }]
+dependencies = [
+    "pydantic>=2.7,<3",
+    "jsonschema>=4.21,<5",
+    "lark>=1.2,<2",
+    "PyYAML>=6,<7",
+    "httpx>=0.27",
+    "rfc8785>=0.1.2",
+    "cryptography>=42",
+    "typer>=0.12",
+]
+
+[project.optional-dependencies]
+anthropic = ["anthropic>=1.0,<2"]
+openai = ["openai>=1.50,<3"]
+
+[project.scripts]
+adjudik = "adjudik_core.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/adjudik_core"]

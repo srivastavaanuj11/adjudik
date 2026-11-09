@@ -1,0 +1,30 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "adjudik-server"
+version = "0.0.0"
+description = "Adjudik Django server: REST API, persistence, review queue, audit log, webhooks, metrics."
+requires-python = ">=3.12,<3.13"
+license = "Apache-2.0"
+dependencies = [
+    "adjudik[anthropic,openai]",
+    "Django>=5.2,<5.3",
+    "djangorestframework>=3.15",
+    "drf-spectacular>=0.27",
+    "django-filter>=24.0",
+    "celery>=5.4",
+    "redis>=5,<6",
+    "psycopg[binary,pool]>=3.1",
+    "structlog>=24.1",
+    "whitenoise>=6.6",
+    "gunicorn>=22.0",
+    "dj-database-url>=2.1",
+]
+
+[tool.uv.sources]
+adjudik = { workspace = true }
+
+[tool.hatch.build.targets.wheel]
+packages = ["adjudik_server", "apps"]

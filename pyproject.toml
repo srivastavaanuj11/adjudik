@@ -1,0 +1,68 @@
+[project]
+name = "adjudik-workspace"
+version = "0.0.0"
+description = "Adjudik monorepo workspace root (not published)."
+requires-python = ">=3.12,<3.13"
+# The root is a virtual aggregator; real code lives in the workspace members.
+dependencies = [
+    "adjudik",
+    "adjudik-server",
+]
+
+[tool.uv.workspace]
+members = ["packages/core", "server"]
+
+[tool.uv.sources]
+adjudik = { workspace = true }
+adjudik-server = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-django>=4.8",
+    "pytest-cov>=5.0",
+    "hypothesis>=6.100",
+    "factory-boy>=3.3",
+    "respx>=0.21",
+    "scipy>=1.13",
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "import-linter>=2.0",
+    "pip-audit>=2.7",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["packages/core/src", "server"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_unused_configs = true
+ignore_missing_imports = true
+
+# Strict typing only on the core library (SPEC §4.3).
+[[tool.mypy.overrides]]
+module = "adjudik_core.*"
+strict = true
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "adjudik_server.settings.test"
+testpaths = ["packages/core/tests", "server/tests"]
+addopts = "-q"
+markers = [
+    "live: tests that call a real LLM provider; skipped by default (SPEC §1 rule 10)",
+]
+
+[tool.importlinter]
+root_packages = ["adjudik_core"]
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "core stays framework-free"
+type = "forbidden"
+source_modules = ["adjudik_core"]
+forbidden_modules = ["django", "rest_framework", "celery"]
