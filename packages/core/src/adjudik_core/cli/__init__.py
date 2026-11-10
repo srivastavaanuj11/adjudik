@@ -151,6 +151,108 @@ def render_prompt(
     typer.echo(user)
 
 
+audit_app = typer.Typer(help="Audit log tools (SPEC §9.6).", no_args_is_help=True)
+app.add_typer(audit_app, name="audit")
+
+
+@audit_app.command(name="verify")
+def audit_verify(
+    export: Path,
+    public_key: str = typer.Option(
+        ..., "--public-key", help="Base64 Ed25519 public key (GET /audit/public-key)"
+    ),
+) -> None:
+    """Verify an NDJSON audit export (SPEC §9.6).
+
+    Checks the hash chain, every checkpoint signature, and that the export ends
+    at a signed checkpoint whose seq matches the last event — which detects
+    truncation. Exit 1 on any failure.
+    """
+    from .. import audit_chain
+
+    try:
+        lines = export.read_text().splitlines()
+    except OSError as exc:
+        typer.secho(f"cannot read {export}: {exc}", fg=typer.colors.RED, err=True)
+        raise typer.Exit(1) from exc
+
+    events: list[dict[str, Any]] = []
+    checkpoints: list[dict[str, Any]] = []
+    for lineno, line in enumerate(lines, start=1):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            rec = json.loads(line)
+        except json.JSONDecodeError as exc:
+            typer.secho(f"line {lineno}: invalid JSON", fg=typer.colors.RED, err=True)
+            raise typer.Exit(1) from exc
+        kind = rec.get("kind")
+        if kind == "event":
+            events.append(rec)
+        elif kind == "checkpoint":
+            checkpoints.append(rec)
+        else:
+            typer.secho(
+                f"line {lineno}: unknown record kind {kind!r}", fg=typer.colors.RED, err=True
+            )
+            raise typer.Exit(1)
+
+    if not events:
+        typer.secho("export contains no events", fg=typer.colors.RED, err=True)
+        raise typer.Exit(1)
+
+    start_seq = int(events[0]["seq"])
+    start_prev = str(events[0]["prev_hash"])
+    result = audit_chain.verify(events, start_seq=start_seq, start_prev_hash=start_prev)
+    if not result.ok:
+        typer.secho(
+            f"chain INVALID: first bad seq {result.first_bad_seq} "
+            f"({result.mismatch_count} mismatch(es))",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(1)
+
+    if not checkpoints:
+        typer.secho(
+            "export has no checkpoints (cannot detect truncation)", fg=typer.colors.RED, err=True
+        )
+        raise typer.Exit(1)
+
+    for cp in checkpoints:
+        if not audit_chain.verify_checkpoint(cp, public_key):
+            typer.secho(
+                f"checkpoint at seq {cp.get('seq')} has a bad signature",
+                fg=typer.colors.RED,
+                err=True,
+            )
+            raise typer.Exit(1)
+
+    final = checkpoints[-1]
+    if int(final["seq"]) != result.head_seq:
+        typer.secho(
+            f"export does not end at a checkpoint: head seq {result.head_seq}, "
+            f"final checkpoint seq {final['seq']} (possible truncation)",
+            fg=typer.colors.RED,
+            err=True,
+        )
+        raise typer.Exit(1)
+
+    # The final checkpoint's hash must match the event it covers.
+    head_event = events[-1]
+    if str(final["hash"]) != str(head_event["hash"]):
+        typer.secho(
+            "final checkpoint hash does not match the head event", fg=typer.colors.RED, err=True
+        )
+        raise typer.Exit(1)
+
+    typer.echo(
+        f"OK: {len(events)} events, seq {start_seq}..{result.head_seq}, "
+        f"{len(checkpoints)} checkpoint(s) verified"
+    )
+
+
 def _load_or_exit(path: Path) -> CompiledDefinition:
     try:
         return load_definition(path)

@@ -47,6 +47,7 @@ THIRD_PARTY_APPS = [
 ]
 # Adjudik apps (SPEC §4.4). Registered as they gain models in later milestones.
 LOCAL_APPS: list[str] = [
+    "apps.common",
     "apps.accounts",
     "apps.decisions",
     "apps.evaluations",
@@ -65,6 +66,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "apps.common.middleware.SessionTimeoutMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
@@ -108,10 +110,45 @@ CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 # --- DRF (SPEC §11.1) ---
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
-    "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
+    "DEFAULT_PARSER_CLASSES": [
+        "rest_framework.parsers.JSONParser",
+        "apps.common.parsers.YAMLParser",
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "apps.common.authentication.ApiKeyAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "EXCEPTION_HANDLER": "apps.common.errors.exception_handler",
+    "UNAUTHENTICATED_USER": None,
 }
+
+# --- Cache / Redis (throttles, login lockouts, token budgets, SPEC §15.8) ---
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": REDIS_URL,
+    }
+}
+
+# --- Auth, passwords and sessions (SPEC §15.2) ---
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 12},
+    },
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+]
+
+SESSION_COOKIE_AGE = 8 * 60 * 60  # 8 h absolute ceiling (SPEC §15.2)
+SESSION_IDLE_TIMEOUT = 30 * 60  # 30 min idle (enforced by middleware)
+SESSION_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_HTTPONLY = True
+
+# Login throttling (SPEC §15.2): 5 attempts/min per username and per IP.
+ADJUDIK_LOGIN_MAX_ATTEMPTS = 5
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Adjudik API",
