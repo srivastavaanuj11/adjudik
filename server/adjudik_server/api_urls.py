@@ -12,5 +12,8 @@ urlpatterns = [
     path("", include("apps.accounts.urls")),
     path("", include("apps.decisions.urls")),
     path("", include("apps.evaluations.urls")),
+    path("", include("apps.reviews.urls")),
+    path("", include("apps.webhooks.urls")),
+    path("", include("apps.metrics.urls")),
     path("", include("apps.audit.urls")),
 ]

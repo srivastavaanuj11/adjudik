@@ -9,6 +9,7 @@ from . import views
 urlpatterns = [
     path("decisions", views.DecisionsView.as_view()),
     path("decisions/validate", views.ValidateView.as_view()),
+    path("decisions/<str:key>/legal-hold", views.DecisionLegalHoldView.as_view()),
     path("decisions/<str:key>", views.DecisionDetailView.as_view()),
     path("decisions/<str:key>/versions", views.VersionsView.as_view()),
     path("decisions/<str:key>/versions/<int:n>", views.VersionDetailView.as_view()),

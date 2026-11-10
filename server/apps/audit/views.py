@@ -37,8 +37,9 @@ class AuditEventsView(AdjudikAPIView):
         from_seq = int(request.query_params.get("from_seq", 1))
         limit = _limit(request)
         rows = list(
-            AuditEvent.objects.filter(workspace_id=self.ctx.workspace.id, seq__gte=from_seq)
-            .order_by("seq")[: limit + 1]
+            AuditEvent.objects.filter(
+                workspace_id=self.ctx.workspace.id, seq__gte=from_seq
+            ).order_by("seq")[: limit + 1]
         )
         next_cursor = None
         if len(rows) > limit:

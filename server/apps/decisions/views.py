@@ -125,6 +125,37 @@ class DecisionsView(AdjudikAPIView):
         }
 
 
+class DecisionLegalHoldView(AdjudikAPIView):
+    """Set or clear a decision's legal hold, covering all its evaluations (SPEC §9.7)."""
+
+    def post(self, request, key):
+        permissions.require(self.ctx, "admin")
+        decision = _resolve_decision(self.ctx, key)
+        data = request.data if isinstance(request.data, dict) else {}
+        hold = bool(data.get("legal_hold", True))
+        now = timezone.now()
+        from django.db import transaction
+
+        with transaction.atomic():
+            decision.legal_hold = hold
+            decision.save(update_fields=["legal_hold"])
+            audit.append_many(
+                self.ctx.workspace.id,
+                [
+                    Event(
+                        "evaluation.legal_hold_changed",
+                        now,
+                        actor_type=self.ctx.actor_type,
+                        actor_id=self.ctx.actor_id,
+                        subject_type="decision",
+                        subject_id=str(decision.id),
+                        payload={"decision_id": str(decision.id), "legal_hold": hold},
+                    )
+                ],
+            )
+        return Response({"key": decision.key, "legal_hold": decision.legal_hold})
+
+
 class DecisionDetailView(AdjudikAPIView):
     def get(self, request, key):
         permissions.require(self.ctx, "read")

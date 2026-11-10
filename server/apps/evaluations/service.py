@@ -214,6 +214,7 @@ def apply_routing(
                 created_at=now,
             )
             events.append(_review_created_event(task, now, ctx_actor))
+        _emit_webhook(evaluation, "evaluation.decided", now)
     else:  # Gate
         evaluation.status = EvaluationStatus.PENDING_REVIEW
         evaluation.route_reason = routing.reason
@@ -244,10 +245,20 @@ def apply_routing(
             created_at=now,
         )
         events.append(_review_created_event(task, now, ctx_actor))
+        _emit_webhook(evaluation, "evaluation.pending_review", now)
 
     evaluation.updated_at = now
     evaluation.save()
     return events
+
+
+def _emit_webhook(evaluation: Evaluation, event_type: str, now: _dt.datetime) -> None:
+    """Insert webhook outbox rows for an evaluation state change (SPEC §11.6)."""
+    from apps.webhooks import service as webhook_service
+
+    # ``evaluation`` already carries the related decision/version on the save path;
+    # the worker path refreshes them on the locked row.
+    webhook_service.emit_evaluation_event(evaluation, event_type, now)
 
 
 def _blind_label_propensity(evaluation: Evaluation) -> float:
@@ -576,3 +587,55 @@ def response_body(evaluation: Evaluation, *, sensitive: bool = False) -> dict[st
 def mark_published(evaluation_id) -> None:
     """Register a post-commit wake-up for a waiting client (SPEC §11.4)."""
     transaction.on_commit(lambda: publish_update(evaluation_id))
+
+
+# --- cancel (SPEC §11.2) ---
+
+
+def cancel(evaluation_id, *, reason: str, ctx_actor: tuple[str, str | None], now: _dt.datetime):
+    """Cancel an evaluation from ``processing`` or ``pending_review`` (SPEC §11.2).
+
+    Locks the evaluation (and so serialises against a concurrent review
+    completion, which locks the same row), cancels its open/claimed gate task,
+    inserts the ``evaluation.cancelled`` webhook outbox row, and appends the
+    cancellation and ``review.cancelled`` events once before commit.
+    """
+    from apps.reviews import service as reviews_service
+    from apps.webhooks import service as webhook_service
+
+    with transaction.atomic():
+        evaluation = (
+            Evaluation.objects.select_for_update(no_key=True, of=("self",))
+            .select_related("decision", "decision_version")
+            .get(pk=evaluation_id)
+        )
+        if evaluation.status not in (
+            EvaluationStatus.PROCESSING,
+            EvaluationStatus.PENDING_REVIEW,
+        ):
+            raise conflict(
+                "invalid_state", "only a processing or pending-review case can be cancelled"
+            )
+
+        evaluation.status = EvaluationStatus.CANCELLED
+        evaluation.cancel_reason = reason
+        evaluation.cancelled_at = now
+        evaluation.state_version += 1
+        evaluation.updated_at = now
+        evaluation.save()
+
+        events: list[Event] = reviews_service.cancel_gate_tasks(evaluation, now=now)
+        events.append(
+            Event(
+                "evaluation.cancelled",
+                now,
+                actor_type=ctx_actor[0],
+                actor_id=ctx_actor[1],
+                evaluation_id=evaluation.id,
+                payload={"reason": reason, "state_version": evaluation.state_version},
+            )
+        )
+        webhook_service.emit_cancelled(evaluation, now)
+        audit.append_many(evaluation.workspace_id, events)
+        mark_published(evaluation.id)
+    return evaluation

@@ -29,7 +29,7 @@ def _unlock(key: int) -> None:
         cur.execute("SELECT pg_advisory_unlock(%s)", [key])
 
 
-@shared_task(queue="jobs", ignore_result=True)
+@shared_task(ignore_result=True)
 def write_audit_checkpoints() -> int | None:  # pragma: no cover - celery wrapper
     if not _try_lock(_CHECKPOINT_LOCK):
         return None
@@ -39,7 +39,7 @@ def write_audit_checkpoints() -> int | None:  # pragma: no cover - celery wrappe
         _unlock(_CHECKPOINT_LOCK)
 
 
-@shared_task(queue="jobs", ignore_result=True)
+@shared_task(ignore_result=True)
 def verify_audit_chains(mode: str = VerificationMode.INCREMENTAL) -> int | None:  # pragma: no cover
     if not _try_lock(_VERIFY_LOCK):
         return None

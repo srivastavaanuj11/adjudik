@@ -35,4 +35,8 @@ class SessionTimeoutMiddleware:
                 logout(request)
             else:
                 request.session[_LAST_KEY] = now
-        return self.get_response(request)
+        response = self.get_response(request)
+        csp = getattr(settings, "ADJUDIK_CSP", "")
+        if csp and "Content-Security-Policy" not in response:
+            response["Content-Security-Policy"] = csp
+        return response

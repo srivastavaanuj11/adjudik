@@ -28,6 +28,10 @@ if _owner_url:
 CELERY_TASK_ALWAYS_EAGER = True
 CELERY_TASK_EAGER_PROPAGATES = True
 
+# Never fire a webhook delivery from an on-commit nudge during unit tests; the
+# dispatcher is driven directly where a test wants it (SPEC §8.7).
+ADJUDIK_WEBHOOK_NUDGE_ON_COMMIT = False
+
 # Keep password hashing fast in tests.
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 

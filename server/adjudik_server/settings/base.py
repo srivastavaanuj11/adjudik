@@ -12,6 +12,7 @@ import os
 from pathlib import Path
 
 import dj_database_url
+from celery.schedules import crontab
 
 # server/ directory (contains manage.py).
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -100,12 +101,65 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # --- Cache / Redis ---
 REDIS_URL = env("REDIS_URL", "redis://localhost:6379/0")
 
-# --- Celery (SPEC §4.1) ---
+# --- Celery (SPEC §4.1, §11.5) ---
 CELERY_BROKER_URL = REDIS_URL
 CELERY_RESULT_BACKEND = None
 CELERY_TASK_ACKS_LATE = True
+CELERY_TASK_REJECT_ON_WORKER_LOST = True
 CELERY_TASK_DEFAULT_QUEUE = "default"
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+CELERY_TASK_IGNORE_RESULT = True
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_BROKER_TRANSPORT_OPTIONS = {"visibility_timeout": 900}
+CELERY_TASK_ROUTES = {
+    "apps.evaluations.tasks.run_model_step": {"queue": "model"},
+    "apps.webhooks.tasks.dispatch_webhooks_task": {"queue": "webhooks"},
+    "apps.evaluations.tasks.sweep_stuck_evaluations_task": {"queue": "jobs"},
+    "apps.evaluations.tasks.purge_expired_data_task": {"queue": "jobs"},
+    "apps.reviews.tasks.release_expired_leases_task": {"queue": "jobs"},
+    "apps.webhooks.tasks.prune_webhook_deliveries_task": {"queue": "jobs"},
+    "apps.audit.tasks.write_audit_checkpoints": {"queue": "jobs"},
+    "apps.audit.tasks.verify_audit_chains": {"queue": "jobs"},
+}
+
+# Periodic jobs (SPEC §8.7). Each takes a pg advisory lock and skips if held.
+CELERY_BEAT_SCHEDULE = {
+    "release-expired-leases": {
+        "task": "apps.reviews.tasks.release_expired_leases_task",
+        "schedule": 60.0,
+    },
+    "sweep-stuck-evaluations": {
+        "task": "apps.evaluations.tasks.sweep_stuck_evaluations_task",
+        "schedule": 60.0,
+    },
+    "dispatch-webhooks": {
+        "task": "apps.webhooks.tasks.dispatch_webhooks_task",
+        "schedule": 5.0,
+    },
+    "write-audit-checkpoints": {
+        "task": "apps.audit.tasks.write_audit_checkpoints",
+        "schedule": 3600.0,
+    },
+    "verify-audit-chains-incremental": {
+        "task": "apps.audit.tasks.verify_audit_chains",
+        "schedule": crontab(hour="3", minute="0"),
+        "args": ("incremental",),
+    },
+    "verify-audit-chains-full": {
+        "task": "apps.audit.tasks.verify_audit_chains",
+        "schedule": crontab(hour="4", minute="0", day_of_week="sun"),
+        "args": ("reconcile",),
+    },
+    "purge-expired-data": {
+        "task": "apps.evaluations.tasks.purge_expired_data_task",
+        "schedule": crontab(hour="2", minute="0"),
+    },
+    "prune-webhook-deliveries": {
+        "task": "apps.webhooks.tasks.prune_webhook_deliveries_task",
+        "schedule": crontab(hour="2", minute="30"),
+    },
+}
 
 # --- DRF (SPEC §11.1) ---
 REST_FRAMEWORK = {
@@ -182,11 +236,28 @@ ADJUDIK_MAX_WAITERS_PER_PROCESS = int(env("ADJUDIK_MAX_WAITERS_PER_PROCESS", "64
 ADJUDIK_STORE_PROMPTS = env_bool("ADJUDIK_STORE_PROMPTS", True)
 ADJUDIK_ALLOW_PRIVATE_WEBHOOKS = env_bool("ADJUDIK_ALLOW_PRIVATE_WEBHOOKS", False)
 ADJUDIK_ALLOW_INSECURE_WEBHOOKS = env_bool("ADJUDIK_ALLOW_INSECURE_WEBHOOKS", False)
+# Wake the webhook dispatcher on commit (SPEC §8.7). Off in tests so the outbox
+# can be inspected without a delivery attempt firing.
+ADJUDIK_WEBHOOK_NUDGE_ON_COMMIT = env_bool("ADJUDIK_WEBHOOK_NUDGE_ON_COMMIT", True)
+ADJUDIK_PROVIDER_CONCURRENCY = int(env("ADJUDIK_PROVIDER_CONCURRENCY", "8"))
 
-# --- Logging (structlog wiring extended in M3b) ---
+# Retention windows (SPEC §9.7). Explanation retention must be >= input retention.
+ADJUDIK_INPUT_RETENTION_DAYS = int(env("ADJUDIK_INPUT_RETENTION_DAYS", "365"))
+ADJUDIK_EXPLANATION_RETENTION_DAYS = int(env("ADJUDIK_EXPLANATION_RETENTION_DAYS", "2555"))
+
+# --- Throttles (SPEC §15.8) ---
+ADJUDIK_EVAL_RATE = env("ADJUDIK_EVAL_RATE", "1200/min")
+ADJUDIK_WORKSPACE_EVAL_RATE = env("ADJUDIK_WORKSPACE_EVAL_RATE", "3000/min")
+ADJUDIK_API_RATE = env("ADJUDIK_API_RATE", "600/min")
+
+# --- Logging (SPEC §15.5) ---
+# The canary filter redacts a configured token so a test can prove inputs and
+# free text never reach the logs. Unset in production, where it is a no-op.
+ADJUDIK_LOG_CANARY = env("ADJUDIK_LOG_CANARY", "")
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "filters": {"canary": {"()": "apps.common.logging.CanaryFilter"}},
+    "handlers": {"console": {"class": "logging.StreamHandler", "filters": ["canary"]}},
     "root": {"handlers": ["console"], "level": "INFO"},
 }

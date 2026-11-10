@@ -34,8 +34,10 @@ _CAPS: dict[str, tuple[set[str], set[str]]] = {
     "publish": ({ADMIN}, set()),
     # Policies: admin session only.
     "policy": ({ADMIN}, set()),
-    # Work reviews: admin or reviewer (session only).
+    # Work reviews (next/claim/heartbeat/release/complete): admin or reviewer.
     "reviews": ({ADMIN, REVIEWER}, set()),
+    # Read reviews: admin, reviewer or auditor (session only, SPEC §11.2).
+    "reviews_read": ({ADMIN, REVIEWER, AUDITOR}, set()),
     # Audit log read/verify/export: admin or auditor.
     "audit": ({ADMIN, AUDITOR}, set()),
     # Purge, legal hold, settings, keys, members, webhooks: admin only.

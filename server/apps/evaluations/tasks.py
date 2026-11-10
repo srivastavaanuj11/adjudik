@@ -29,6 +29,7 @@ from .models import Evaluation, EvaluationStatus, ModelCall, ModelCallStatus
 
 WORKER_SYSTEM_ACTOR = ("system", None)
 ADVISORY_SWEEP_KEY = 0x4144_0001  # "AD" + job id
+ADVISORY_PURGE_KEY = 0x4144_0007
 
 
 def _core_policy(db_policy):
@@ -270,7 +271,6 @@ def gate_internal_error(evaluation_id, *, now=None) -> None:
 
 @shared_task(
     bind=True,
-    queue="model",
     acks_late=True,
     max_retries=1,
     soft_time_limit=120,
@@ -366,14 +366,34 @@ def sweep_stuck_evaluations(*, now: _dt.datetime | None = None) -> dict[str, int
     return {"reenqueued": reenqueued, "gated": gated, "lost": lost}
 
 
-@shared_task(queue="jobs", ignore_result=True)
-def sweep_stuck_evaluations_task() -> dict[str, int] | None:  # pragma: no cover - celery wrapper
+def _try_lock(key: int) -> bool:
     with connection.cursor() as cur:
-        cur.execute("SELECT pg_try_advisory_lock(%s)", [ADVISORY_SWEEP_KEY])
-        if not cur.fetchone()[0]:
-            return None
+        cur.execute("SELECT pg_try_advisory_lock(%s)", [key])
+        return bool(cur.fetchone()[0])
+
+
+def _unlock(key: int) -> None:
+    with connection.cursor() as cur:
+        cur.execute("SELECT pg_advisory_unlock(%s)", [key])
+
+
+@shared_task(ignore_result=True)
+def sweep_stuck_evaluations_task() -> dict[str, int] | None:  # pragma: no cover - celery wrapper
+    if not _try_lock(ADVISORY_SWEEP_KEY):
+        return None
     try:
         return sweep_stuck_evaluations()
     finally:
-        with connection.cursor() as cur:
-            cur.execute("SELECT pg_advisory_unlock(%s)", [ADVISORY_SWEEP_KEY])
+        _unlock(ADVISORY_SWEEP_KEY)
+
+
+@shared_task(ignore_result=True)
+def purge_expired_data_task() -> dict[str, int] | None:  # pragma: no cover - celery wrapper
+    from . import retention
+
+    if not _try_lock(ADVISORY_PURGE_KEY):
+        return None
+    try:
+        return retention.purge_expired_data(now=timezone.now())
+    finally:
+        _unlock(ADVISORY_PURGE_KEY)

@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 from .authentication import ApiKeyAuthentication, build_session_context
 from .context import RequestContext
 from .errors import unauthenticated
+from .throttling import GeneralApiThrottle
 
 
 class AdjudikAPIView(APIView):
@@ -20,6 +21,7 @@ class AdjudikAPIView(APIView):
 
     authentication_classes = [ApiKeyAuthentication, SessionAuthentication]
     permission_classes = [AllowAny]  # capability checks are explicit in each view
+    throttle_classes = [GeneralApiThrottle]  # 600/min per actor (SPEC §15.8)
     login_optional = False
 
     def initial(self, request, *args, **kwargs) -> None:

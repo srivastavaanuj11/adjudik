@@ -6,6 +6,53 @@ pre-1.0 and versioned by milestone (SPEC §17).
 
 ## [Unreleased]
 
+### M3b — Server operations
+
+- Review queue (SPEC §8.5/§8.6): `next` (own claim or lock-the-next with
+  `skip_locked`), `claim` (refused under `next_only` for reviewers), `heartbeat`,
+  `release`, and `complete` (accept/override/decide, declared reason codes,
+  `agrees_with_model`). Gate completion decides the evaluation (`decided_by =
+  human`); audit disagreement writes `audit.disagreement`. Blind redaction hides
+  the suggestion, confidence and the evaluation's outcome. Lock order
+  decision → evaluation → review_task with `FOR NO KEY UPDATE`. Tested for the
+  parallel `next`, lease expiry, one-claim-per-reviewer, reason codes, claim
+  modes and blind redaction.
+- Evaluation cancel (SPEC §11.2): creating key or admin only, from `processing`
+  or `pending_review`, cancelling the open gate task; serialised against review
+  completion and covered by a cancel-versus-complete race test.
+- Webhooks (SPEC §11.6): the outbox inserts a thin payload (ids, enums, numbers
+  only) in the state-change transaction for decided, pending-review, cancelled
+  and audit-disagreement events; the dispatcher claims due rows
+  `FOR UPDATE SKIP LOCKED`, sends with the `10 s … 6 h` retry schedule then
+  `dead`, signs `v1=<hmac>` (two during the 24 h rotation grace), and enforces
+  SSRF controls (global-address check after unwrapping mapped forms, IP pinning
+  with Host/SNI preserved, https/443/8443, no redirects); a DNS-flips-between-
+  attempts test proves per-attempt re-checking. Management endpoints return the
+  secret once.
+- Decision metrics (SPEC §11.7): volume, decided-by split, automation/model/
+  review/override rates, propensity-weighted audit agreement with a two-sided
+  95 % Clopper-Pearson interval, queue, latency and turnaround percentiles,
+  route reasons, tokens/cost and a daily series, cached 60 s; checked against a
+  deterministic hand-computed fixture.
+- Retention, purge, legal hold and salt destruction (SPEC §9.7): the daily job
+  and the immediate `POST .../purge` null input and explanation columns (and the
+  salt), honour evaluation and decision legal holds, and leave outcomes, hashes
+  and audit events intact so the chain still verifies and `reconcile` still
+  passes after a purge.
+- Periodic jobs (SPEC §8.7): `release_expired_leases`, `purge_expired_data`,
+  `dispatch_webhooks` and `prune_webhook_deliveries` join the M3a sweeper,
+  checkpoints and verification on a Celery beat schedule; every job takes a
+  `pg_try_advisory_lock` and skips when it is held (tested per job).
+- Hardening: per-key and per-workspace evaluate throttles and a per-actor API
+  throttle return `429` with `Retry-After`; CSRF is enforced on session writes;
+  a logging canary filter proves inputs never reach the logs; `settings.prod`
+  refuses to start, naming the failed check, for each §15.7 condition, and emits
+  the CSP.
+- `seed_demo` (SPEC §16.5): builds the `demo` workspace, publishes both examples
+  with the `demo` provider, generates traffic and simulates reviewers with a
+  hidden ground-truth so agreement rises with confidence; refuses unless
+  `DEBUG`. Until M5 the readiness check asserts label counts per outcome.
+
 ### M3a — Server foundation
 
 - Full §10 data model and migrations across `accounts`, `decisions`,

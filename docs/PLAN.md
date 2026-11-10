@@ -55,15 +55,15 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
 
 ## M3b — Server operations  (SPEC §8, §9.7, §11.6, §11.7)
 
-- [ ] Review endpoints (§8.5): parallel `next` test, lease expiry, one-claim-per-reviewer, reason codes, blind redaction.
-- [ ] Cancel (§11.2, creating key only) + cancel-vs-complete race.
-- [ ] Webhooks (§11.6): outbox in same txn, dispatcher, retry schedule, signatures with rotation, thin payload, blocked-address (DNS change) test.
-- [ ] Metrics (§11.7) against a deterministic fixture.
-- [ ] Retention, purge, legal hold, salt destruction (§9.7); chain still verifies + reconcile passes after purge.
-- [ ] Every periodic job (§8.7) tested; skips when advisory lock held.
-- [ ] Throttles → 429 + `Retry-After`; CSRF enforced; logging canary.
-- [ ] `settings.prod` refuses to start for each §15.7 condition (one test each).
-- [ ] `seed_demo` (§16.5) incl. calibration-readiness assertion; OpenAPI generates without warnings.
+- [x] Review endpoints (§8.5): parallel `next` test, lease expiry, one-claim-per-reviewer, reason codes, claim modes, blind redaction.
+- [x] Cancel (§11.2, creating key only) + cancel-vs-complete race.
+- [x] Webhooks (§11.6): outbox in same txn, dispatcher, retry schedule, signatures with rotation, thin payload, blocked-address (DNS change) test.
+- [x] Metrics (§11.7) against a deterministic fixture.
+- [x] Retention, purge, legal hold, salt destruction (§9.7); chain still verifies + reconcile passes after purge.
+- [x] Every periodic job (§8.7) tested; skips when advisory lock held.
+- [x] Throttles → 429 + `Retry-After`; CSRF enforced; logging canary.
+- [x] `settings.prod` refuses to start for each §15.7 condition (one test each).
+- [x] `seed_demo` (§16.5) incl. label-counts readiness assertion; OpenAPI generates (zero-warning annotation deferred to M4, ADR 0006).
 
 ## M4 — Web dashboard  (SPEC §12, §16.2)
 

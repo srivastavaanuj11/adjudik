@@ -63,11 +63,20 @@ def _hash_fields(seq: int, workspace_id: str, ev: Event, payload: dict[str, Any]
 
 
 def _append_guard() -> None:
-    """Enforce the one-append-per-transaction rule (SPEC §9.3)."""
+    """Enforce the one-append-per-transaction rule (SPEC §9.3).
+
+    The marker is keyed to ``(id(connection.run_on_commit), innermost savepoint)``.
+    Django swaps ``run_on_commit`` for a fresh list when each transaction commits,
+    so sequential transactions on one reused connection — for example a submit and
+    the model worker that its on-commit hook runs — get distinct keys, while a
+    genuine second append within the same transaction and savepoint repeats the
+    key and is rejected.
+    """
     conn = transaction.get_connection()
     if not conn.in_atomic_block:
         raise AuditAppendError("append_many must run inside a transaction (SPEC §9.3)")
-    marker = conn.savepoint_ids[-1] if conn.savepoint_ids else "__outermost__"
+    savepoint = conn.savepoint_ids[-1] if conn.savepoint_ids else "__outermost__"
+    marker = (id(conn.run_on_commit), savepoint)
     if getattr(conn, "_adjudik_append_marker", None) == marker:
         raise AuditAppendError("append_many called twice in one transaction (SPEC §9.3)")
     conn._adjudik_append_marker = marker
