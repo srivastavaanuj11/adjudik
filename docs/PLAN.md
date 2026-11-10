@@ -45,13 +45,13 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
 
 ## M3a — Server foundation  (SPEC §9–§11, §15)
 
-- [ ] Models/migrations per §10: composite workspace FKs, partial unique indexes, grants, triggers; `UPDATE` on `audit_event` fails as both roles; non-draft definitions and terminal evaluations cannot update.
-- [ ] `adjudik_bootstrap`; session + API-key auth; members; login throttle, password validators, session lifetimes; API-key expiry and rotation.
-- [ ] Permission test + two-workspace isolation test (§15.1) for every endpoint so far.
-- [ ] Decisions/versions: YAML+JSON upload, validate, multi-draft, publish (rule 11), retire, carry-over, dry-run, render-prompt.
-- [ ] Workspace settings + manual automation policies with floors.
-- [ ] Evaluate (§11.3/§11.4); worker + sweeper (§11.5): rule-only 200; model path 200/202; idempotency incl. concurrent test; resubmission/injection/budget gates; fencing race test.
-- [ ] Audit chain (§9.2/§9.3): head-row append, one-append rule, 32-writer concurrency; hourly checkpoints; verification 3 modes; export + `adjudik audit verify`.
+- [x] Models/migrations per §10: composite workspace FKs, partial unique indexes, grants, triggers; `UPDATE` on `audit_event` fails as both roles; non-draft definitions and terminal evaluations cannot update.
+- [x] `adjudik_bootstrap`; session + API-key auth; members; login throttle, password validators, session lifetimes; API-key expiry and rotation.
+- [x] Permission test + two-workspace isolation test (§15.1) for every endpoint so far.
+- [x] Decisions/versions: YAML+JSON upload, validate, multi-draft, publish (rule 11 + four-eyes), retire, carry-over, dry-run, render-prompt, acknowledge-model.
+- [x] Workspace settings + manual automation policies with floors and four-eyes.
+- [x] Evaluate (§11.3/§11.4); worker + sweeper (§11.5): rule-only 200; model path 200/202; idempotency incl. concurrent test; resubmission/injection/budget gates; fencing race test.
+- [x] Audit chain (§9.2/§9.3): head-row append, one-append rule, 32-writer concurrency; hourly checkpoints; verification 3 modes; export + `adjudik audit verify`.
 
 ## M3b — Server operations  (SPEC §8, §9.7, §11.6, §11.7)
 

@@ -32,3 +32,10 @@ CELERY_TASK_EAGER_PROPAGATES = True
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 
 os.environ.setdefault("ADJUDIK_PROVIDERS", "")
+
+# A deterministic-per-run Ed25519 audit signing key, unless one is provided.
+ADJUDIK_AUDIT_SIGNING_KEY = env("ADJUDIK_AUDIT_SIGNING_KEY", "")
+if not ADJUDIK_AUDIT_SIGNING_KEY:
+    from adjudik_core import audit_chain as _audit_chain
+
+    ADJUDIK_AUDIT_SIGNING_KEY, _ = _audit_chain.generate_signing_key()

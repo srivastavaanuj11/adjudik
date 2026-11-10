@@ -6,6 +6,48 @@ pre-1.0 and versioned by milestone (SPEC §17).
 
 ## [Unreleased]
 
+### M3a — Server foundation
+
+- Full §10 data model and migrations across `accounts`, `decisions`,
+  `evaluations`, `reviews`, `audit` and `webhooks`: UUID4 PKs (bigint identity
+  for `audit_event`), DB-level composite workspace foreign keys
+  `(workspace_id, parent_id)`, partial unique indexes (one active version per
+  decision, one active policy per version, idempotency key per decision), the
+  §10.3 grant matrix and the §9.6 immutability triggers (append-only
+  `audit_event`, frozen published definitions and terminal evaluations/reviews).
+- Audit append service (SPEC §9.3): `append_many` locks the chain head, assigns
+  gapless seqs and chain hashes, and enforces the one-append-per-transaction
+  rule; covered by the one-append and 32-writer concurrency tests, and by
+  append-only checks as both the owner and `adjudik_app` roles.
+- Core `audit_chain` (framework-free): `verify`, Ed25519 checkpoint
+  signing/verification, and `adjudik audit verify` with truncation detection.
+- Auth and accounts (SPEC §15.2, §16.6): `adjudik_bootstrap`; session and
+  `Bearer adk_…` API-key authentication; capability permissions
+  (`is_staff`/`is_superuser` never consulted); members; API-key
+  create/expire/rotate (24 h grace)/revoke; login throttle with doubling
+  lockouts; first-login password change; 8 h/30 min session lifetimes;
+  workspace settings with floors.
+- Decisions and versions (SPEC §11.2, §11.8): YAML and JSON draft upload,
+  validate, multiple drafts, publish (rule 11 provider check, four-eyes, and the
+  model-step fingerprint computed at publish), retire with policy deactivation,
+  policy carry-over, dry-run, render-prompt, and acknowledge-model.
+- Manual automation policies (SPEC §8.1): propose (activates at once unless
+  four-eyes), approve by a different admin, reject and deactivate, checked
+  against the `min_threshold` and `min_audit_sample_rate` floors.
+- Evaluate (SPEC §11.3/§11.4), the model worker and the sweeper (§11.5): rule
+  path returns 200, the model path 200/202; idempotency replay/conflict with the
+  concurrent-race test; the injection, resubmission and budget pre-model gates;
+  the fencing-token guard with its race test; and the Redis-backed result wait.
+  The server drives the core step functions and builds its own audit events with
+  salted content hashes and real row ids.
+- Audit operations (SPEC §9.5/§9.6): hourly signed checkpoints (optional
+  anchor POST), the three verification modes (incremental, full, reconcile) as a
+  job recording `audit_verification`, and NDJSON export ending in an export-time
+  checkpoint; `adjudik audit verify` accepts a good export and rejects tampered
+  or truncated ones.
+- The §15.1 permission matrix and the two-workspace isolation test pass for
+  every endpoint built so far.
+
 ### M2 — Core model step and engine
 
 - Provider interface and providers (SPEC §7.1-§7.2): `anthropic` (Messages API,

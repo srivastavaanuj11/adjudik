@@ -10,4 +10,7 @@ from django.urls import include, path
 
 urlpatterns = [
     path("", include("apps.accounts.urls")),
+    path("", include("apps.decisions.urls")),
+    path("", include("apps.evaluations.urls")),
+    path("", include("apps.audit.urls")),
 ]

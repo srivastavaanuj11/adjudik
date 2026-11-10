@@ -6,13 +6,18 @@ switched automation on, sends everything else to a human, and logs every step in
 tamper-evident record. See [`docs/SPEC.md`](docs/SPEC.md) for the full specification
 and [`docs/PLAN.md`](docs/PLAN.md) for the milestone checklist.
 
-> **Status: M2 (core model step and engine).** The core loads and validates
-> decision definitions, evaluates FEEL-lite rules, runs the LLM model step
-> (providers, minimisation, injection screen, prompt, parsing, repairs, retries
-> and confidence estimation), and routes every case per the spec — all
-> framework-free, with a deterministic `demo` provider. The CLI adds
-> `render-prompt` and `test --with-model`. The server API (M3+) is not
-> implemented yet; the server exposes only `/healthz` and `/readyz`.
+> **Status: M3a (server foundation).** The framework-free core loads and
+> validates decision definitions, evaluates FEEL-lite rules, runs the LLM model
+> step (providers, minimisation, injection screen, prompt, parsing, repairs,
+> retries and confidence estimation), and routes every case per the spec, with a
+> deterministic `demo` provider. The Django server now adds the §10 data model,
+> session and API-key auth, decisions/versions (upload, validate, publish,
+> retire, carry-over, dry-run, render-prompt, acknowledge-model), manual
+> automation policies, the evaluate endpoint with its model worker and sweeper,
+> and the tamper-evident audit log (per-workspace hash chain, hourly signed
+> checkpoints, verification and NDJSON export). The CLI adds `audit verify`.
+> Review endpoints, webhooks, metrics, retention/purge and the web dashboard
+> (M3b+) are not implemented yet.
 
 ## Architecture
 
