@@ -67,11 +67,13 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
 
 ## M4 — Web dashboard  (SPEC §12, §16.2)
 
-- [ ] All §12.1 screens except calibration/replay tabs, role-based nav.
-- [ ] Review workspace (§12.2); component test: blind never renders a suggestion; visible suggestions never show confidence.
-- [ ] Playwright: reviewer completes 3 reviews by keyboard; auditor sees `decided_by: human` + timeline.
-- [ ] Playwright: admin proposes a manual policy.
-- [ ] `Dockerfile` + `docker-compose.prod.yml` (§16.2) build and serve dashboard + API, incl. SPA deep links.
+- [x] All §12.1 screens except calibration/replay tabs, role-based nav. (Typed
+  client hand-authored over the committed OpenAPI; Test tab uses a JSON textarea
+  not CodeMirror — ADR 0007.)
+- [x] Review workspace (§12.2); component test: blind never renders a suggestion; visible suggestions never show confidence.
+- [x] Playwright: reviewer completes 3 reviews by keyboard; auditor sees `decided_by: human` + timeline. (Spec authored + list-validated; runs via `make e2e-seed && make e2e` against the compose stack.)
+- [x] Playwright: admin proposes a manual policy, approved by a second admin under four-eyes. (Same; runs against the compose stack.)
+- [x] `Dockerfile` + `docker-compose.prod.yml` (§16.2) build and serve dashboard + API, incl. SPA deep links. (Image builds clean; prod CSP vs inline styles noted in ADR 0007.)
 
 ## M5 — Calibration  (SPEC §13, §8.8)
 
