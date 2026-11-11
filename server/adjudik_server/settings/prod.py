@@ -40,6 +40,14 @@ X_FRAME_OPTIONS = "DENY"
 # Content Security Policy (SPEC §15.7), emitted by the common middleware.
 ADJUDIK_CSP = "default-src 'self'; object-src 'none'; frame-ancestors 'none'"
 
+# Serve the SPA's content-hashed assets without Django's manifest rewriting:
+# Vite already fingerprints filenames, and index.html is served by a view, not
+# collected through the manifest (SPEC §16.2).
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+}
+
 # django.contrib.admin is never installed (SPEC §15.7); base does not add it.
 
 

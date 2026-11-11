@@ -32,9 +32,17 @@ test: ## Core, server and web unit tests
 	uv run pytest
 	cd web && npm test
 
+.PHONY: e2e-seed
+e2e-seed: ## Seed demo data with a fixed password for Playwright (SPEC §16.5)
+	$(COMPOSE) exec -e ADJUDIK_SEED_PASSWORD=$(E2E_PASSWORD) server \
+		python manage.py seed_demo --password $(E2E_PASSWORD)
+
 .PHONY: e2e
-e2e: ## Playwright against the compose stack
-	cd web && npm run e2e
+e2e: ## Playwright against the compose stack (run `make e2e-seed` first)
+	cd web && E2E_PASSWORD=$(E2E_PASSWORD) npm run e2e
+
+# Fixed password shared by `e2e-seed` and the Playwright flows.
+E2E_PASSWORD ?= adjudik-e2e-pw
 
 .PHONY: lint
 lint: ## ruff, mypy, import-linter, ESLint, tsc, pip-audit, npm audit
@@ -53,5 +61,4 @@ fmt: ## Auto-format Python and web
 
 .PHONY: openapi
 openapi: ## Regenerate openapi.json and the web client
-	$(COMPOSE) exec server python manage.py spectacular --file /app/schemas/openapi.json
-	cd web && npm run gen:api
+	$(COMPOSE) exec server python manage.py spectacular --format openapi-json --file /app/schemas/openapi.json

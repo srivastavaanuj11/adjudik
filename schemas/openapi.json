@@ -1,0 +1,1794 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "Adjudik API",
+        "version": "1",
+        "description": "Adjudik decision engine REST API (SPEC §11)."
+    },
+    "paths": {
+        "/api/v1/api-keys": {
+            "get": {
+                "operationId": "api_keys_retrieve",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "api-keys"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "api_keys_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "api-keys"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/api-keys/{key_id}/revoke": {
+            "post": {
+                "operationId": "api_keys_revoke_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "api-keys"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/api-keys/{key_id}/rotate": {
+            "post": {
+                "operationId": "api_keys_rotate_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "api-keys"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/audit/checkpoints": {
+            "get": {
+                "operationId": "audit_checkpoints_retrieve",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "audit"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/audit/events": {
+            "get": {
+                "operationId": "audit_events_retrieve",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "audit"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/audit/export": {
+            "get": {
+                "operationId": "audit_export_retrieve",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "audit"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/audit/public-key": {
+            "get": {
+                "operationId": "audit_public_key_retrieve",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "audit"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/audit/verifications": {
+            "post": {
+                "operationId": "audit_verifications_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "audit"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/audit/verifications/{verification_id}": {
+            "get": {
+                "operationId": "audit_verifications_retrieve",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "verification_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "audit"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/audit/verifications/latest": {
+            "get": {
+                "operationId": "audit_verifications_latest_retrieve",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "audit"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/csrf": {
+            "get": {
+                "operationId": "auth_csrf_retrieve",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "auth"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/login": {
+            "post": {
+                "operationId": "auth_login_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "auth"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/logout": {
+            "post": {
+                "operationId": "auth_logout_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "auth"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/me": {
+            "get": {
+                "operationId": "auth_me_retrieve",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "auth"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/password": {
+            "post": {
+                "operationId": "auth_password_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "auth"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/workspace": {
+            "post": {
+                "operationId": "auth_workspace_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "auth"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/decisions": {
+            "get": {
+                "operationId": "decisions_retrieve",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "decisions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "decisions_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "decisions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/decisions/{key}": {
+            "get": {
+                "operationId": "decisions_retrieve_2",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "decisions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/decisions/{key}/evaluate": {
+            "post": {
+                "operationId": "decisions_evaluate_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "decisions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/decisions/{key}/legal-hold": {
+            "post": {
+                "operationId": "decisions_legal_hold_create",
+                "description": "Set or clear a decision's legal hold, covering all its evaluations (SPEC §9.7).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "decisions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/decisions/{key}/metrics": {
+            "get": {
+                "operationId": "decisions_metrics_retrieve",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "decisions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/decisions/{key}/versions": {
+            "get": {
+                "operationId": "decisions_versions_retrieve",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "decisions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "decisions_versions_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "decisions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/decisions/{key}/versions/{n}": {
+            "get": {
+                "operationId": "decisions_versions_retrieve_2",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "n",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "decisions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            },
+            "put": {
+                "operationId": "decisions_versions_update",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "n",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "decisions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/decisions/{key}/versions/{n}/acknowledge-model": {
+            "post": {
+                "operationId": "decisions_versions_acknowledge_model_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "n",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "decisions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/decisions/{key}/versions/{n}/dry-run": {
+            "post": {
+                "operationId": "decisions_versions_dry_run_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "n",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "decisions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/decisions/{key}/versions/{n}/policies": {
+            "get": {
+                "operationId": "decisions_versions_policies_retrieve",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "n",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "decisions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "decisions_versions_policies_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "n",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "decisions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/decisions/{key}/versions/{n}/policy": {
+            "get": {
+                "operationId": "decisions_versions_policy_retrieve",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "n",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "decisions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/decisions/{key}/versions/{n}/publish": {
+            "post": {
+                "operationId": "decisions_versions_publish_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "n",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "decisions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/decisions/{key}/versions/{n}/render-prompt": {
+            "post": {
+                "operationId": "decisions_versions_render_prompt_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "n",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "decisions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/decisions/{key}/versions/{n}/retire": {
+            "post": {
+                "operationId": "decisions_versions_retire_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "n",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "decisions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/decisions/validate": {
+            "post": {
+                "operationId": "decisions_validate_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "decisions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/evaluations": {
+            "get": {
+                "operationId": "evaluations_retrieve",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "evaluations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/evaluations/{eval_id}": {
+            "get": {
+                "operationId": "evaluations_retrieve_2",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "eval_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "evaluations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/evaluations/{eval_id}/cancel": {
+            "post": {
+                "operationId": "evaluations_cancel_create",
+                "description": "Cancel an evaluation (SPEC §11.2): the creating ``evaluate`` key or an admin.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "eval_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "evaluations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/evaluations/{eval_id}/events": {
+            "get": {
+                "operationId": "evaluations_events_retrieve",
+                "description": "Audit timeline for one evaluation (SPEC §11.2, read).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "eval_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "evaluations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/evaluations/{eval_id}/legal-hold": {
+            "post": {
+                "operationId": "evaluations_legal_hold_create",
+                "description": "Set or clear an evaluation's legal hold (SPEC §9.7, admin).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "eval_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "evaluations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/evaluations/{eval_id}/model-calls": {
+            "get": {
+                "operationId": "evaluations_model_calls_retrieve",
+                "description": "Provider calls for one evaluation (SPEC §11.2, sensitive).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "eval_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "evaluations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/evaluations/{eval_id}/purge": {
+            "post": {
+                "operationId": "evaluations_purge_create",
+                "description": "Immediately purge an evaluation's data (SPEC §9.7, admin).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "eval_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "evaluations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/members": {
+            "get": {
+                "operationId": "members_retrieve",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "members"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "members_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "members"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/members/{member_id}": {
+            "patch": {
+                "operationId": "members_partial_update",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "member_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "members"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "members_destroy",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "member_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "members"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/policies/{policy_id}/approve": {
+            "post": {
+                "operationId": "policies_approve_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "policy_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "policies"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/policies/{policy_id}/deactivate": {
+            "post": {
+                "operationId": "policies_deactivate_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "policy_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "policies"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/policies/{policy_id}/reject": {
+            "post": {
+                "operationId": "policies_reject_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "policy_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "policies"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/reviews": {
+            "get": {
+                "operationId": "reviews_retrieve",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "reviews"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/reviews/{task_id}": {
+            "get": {
+                "operationId": "reviews_retrieve_2",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "task_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/reviews/{task_id}/claim": {
+            "post": {
+                "operationId": "reviews_claim_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "task_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/reviews/{task_id}/complete": {
+            "post": {
+                "operationId": "reviews_complete_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "task_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/reviews/{task_id}/heartbeat": {
+            "post": {
+                "operationId": "reviews_heartbeat_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "task_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/reviews/{task_id}/release": {
+            "post": {
+                "operationId": "reviews_release_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "task_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "reviews"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/reviews/next": {
+            "post": {
+                "operationId": "reviews_next_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "reviews"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/webhooks": {
+            "get": {
+                "operationId": "webhooks_retrieve",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "webhooks"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "webhooks_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "webhooks"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/webhooks/{endpoint_id}": {
+            "patch": {
+                "operationId": "webhooks_partial_update",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "endpoint_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "webhooks"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/webhooks/{endpoint_id}/deliveries": {
+            "get": {
+                "operationId": "webhooks_deliveries_retrieve",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "endpoint_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "webhooks"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/webhooks/{endpoint_id}/rotate-secret": {
+            "post": {
+                "operationId": "webhooks_rotate_secret_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "endpoint_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "webhooks"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/webhooks/deliveries/{delivery_id}/retry": {
+            "post": {
+                "operationId": "webhooks_deliveries_retry_create",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "delivery_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "webhooks"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/workspace/settings": {
+            "get": {
+                "operationId": "workspace_settings_retrieve",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "workspace"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "workspace_settings_partial_update",
+                "description": "Common base: API-key or session auth, with the workspace context attached.\n\nSet ``login_optional = True`` on subclasses used before authentication\n(login, csrf). Otherwise an unauthenticated request gets ``401``.",
+                "tags": [
+                    "workspace"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    },
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "cookieAuth": {
+                "type": "apiKey",
+                "in": "cookie",
+                "name": "sessionid"
+            }
+        }
+    }
+}

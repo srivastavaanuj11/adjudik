@@ -8,5 +8,15 @@ export default tseslint.config(
   {
     files: ["**/*.{ts,tsx}"],
     languageOptions: { ecmaVersion: 2022, sourceType: "module" },
+    rules: {
+      // SPEC §12.4: no dangerouslySetInnerHTML anywhere in the dashboard.
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']",
+          message: "dangerouslySetInnerHTML is forbidden (SPEC §12.4).",
+        },
+      ],
+    },
   },
 );

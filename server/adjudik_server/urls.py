@@ -6,14 +6,18 @@ and the SPA catch-all are added in M3a and M4 respectively.
 
 from __future__ import annotations
 
-from django.urls import include, path
+from django.urls import include, path, re_path
 from drf_spectacular.views import SpectacularAPIView
 
 from .health import healthz, readyz
+from .spa import spa_index
 
 urlpatterns = [
     path("healthz", healthz, name="healthz"),
     path("readyz", readyz, name="readyz"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/v1/", include("adjudik_server.api_urls")),
+    # SPA catch-all for deep links: anything not an API, health or static path
+    # returns index.html (SPEC §16.2). WhiteNoise serves /static/ ahead of this.
+    re_path(r"^(?!api/|healthz|readyz|static/|media/).*$", spa_index, name="spa"),
 ]

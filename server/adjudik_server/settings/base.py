@@ -221,6 +221,10 @@ USE_TZ = True
 # --- Static files (SPA served via WhiteNoise in prod, SPEC §16.2) ---
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+# The built SPA (web/dist) is collected into STATIC_ROOT when present; its assets
+# are already content-hashed by Vite and are served by WhiteNoise under /static/.
+_WEB_DIST = BASE_DIR.parent / "web" / "dist"
+STATICFILES_DIRS = [_WEB_DIST] if _WEB_DIST.exists() else []
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},

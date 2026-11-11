@@ -1,0 +1,76 @@
+# Production-shaped stack (SPEC §16.2): the multi-stage image serves the API and
+# the built dashboard via gunicorn + WhiteNoise under settings.prod; three Celery
+# workers and beat share the image. Postgres and Redis use passwords.
+#
+# Copy .env.prod.example to .env.prod and replace every secret before use. The
+# server refuses to start if any §15.7 check fails (see settings/hardening.py).
+
+x-app: &app
+  image: adjudik:prod
+  build:
+    context: .
+    dockerfile: Dockerfile
+  env_file: .env.prod
+  depends_on:
+    db:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
+services:
+  db:
+    image: postgres:16
+    # The two runtime roles are created by scripts/db-init.sql. For a real
+    # deployment, replace that script (and the URLs in .env.prod) with your own
+    # roles and secrets, and do not grant CREATEDB (SPEC §10.3).
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-adjudik}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_SUPER_PASSWORD:?set POSTGRES_SUPER_PASSWORD}
+    command: ["postgres", "-c", "max_connections=200"]
+    volumes:
+      - pgdata-prod:/var/lib/postgresql/data
+      - ./scripts/db-init.sql:/docker-entrypoint-initdb.d/db-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ${POSTGRES_DB:-adjudik}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:?set REDIS_PASSWORD}"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  server:
+    <<: *app
+    # Migrate as the owner role, gather the SPA, then serve.
+    command: >
+      sh -c "DATABASE_URL=\"$$DATABASE_OWNER_URL\" python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput &&
+             gunicorn adjudik_server.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 60 --access-logfile -"
+    ports:
+      - "127.0.0.1:8000:8000"
+
+  worker-model:
+    <<: *app
+    command: celery -A adjudik_server worker -Q model -P threads -c 16 -l info
+
+  worker-webhooks:
+    <<: *app
+    command: celery -A adjudik_server worker -Q webhooks -P threads -c 8 -l info
+
+  worker-jobs:
+    <<: *app
+    command: celery -A adjudik_server worker -Q jobs,default -c 2 --max-tasks-per-child 20 -l info
+
+  beat:
+    <<: *app
+    command: celery -A adjudik_server beat -l info
+
+volumes:
+  pgdata-prod:

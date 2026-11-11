@@ -67,6 +67,12 @@ class Command(BaseCommand):
         parser.add_argument("--refunds", type=int, default=600)
         parser.add_argument("--support", type=int, default=3500)
         parser.add_argument("--seed", type=int, default=0)
+        parser.add_argument(
+            "--password",
+            default=None,
+            help="Fixed password for every demo user (for e2e). Falls back to "
+            "$ADJUDIK_SEED_PASSWORD; a random one per user when unset.",
+        )
 
     def handle(self, *args, **options) -> None:
         if not settings.DEBUG:
@@ -84,7 +90,10 @@ class Command(BaseCommand):
         ws.settings.calibration_blind_rate = 1.0  # shadow mode: collect labels fast
         ws.settings.save(update_fields=["calibration_blind_rate"])
 
-        users = self._make_users(ws, start)
+        import os
+
+        fixed_password = options.get("password") or os.environ.get("ADJUDIK_SEED_PASSWORD")
+        users = self._make_users(ws, start, fixed_password=fixed_password)
         self.stdout.write("Demo users (password):")
         for name, (_user, pw) in users.items():
             self.stdout.write(f"  {name}: {pw}")
@@ -110,18 +119,20 @@ class Command(BaseCommand):
         self._clock += _dt.timedelta(minutes=minutes)
         return self._clock
 
-    def _make_users(self, ws, now) -> dict:
+    def _make_users(self, ws, now, *, fixed_password: str | None = None) -> dict:
         import secrets
 
         model = get_user_model()
         out: dict = {}
+        # A second admin (admin2) lets the four-eyes approval flow be exercised.
         for name, role in (
             ("admin", Role.ADMIN),
+            ("admin2", Role.ADMIN),
             ("author", Role.AUTHOR),
             ("reviewer", Role.REVIEWER),
             ("auditor", Role.AUDITOR),
         ):
-            pw = secrets.token_urlsafe(12)
+            pw = fixed_password or secrets.token_urlsafe(12)
             user = model.objects.create_user(username=f"demo-{name}", password=pw)
             Membership.objects.create(workspace=ws, user=user, role=role, created_at=now)
             UserPasswordState.objects.update_or_create(user=user, defaults={"must_change": False})
