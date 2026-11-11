@@ -6,6 +6,39 @@ pre-1.0 and versioned by milestone (SPEC §17).
 
 ## [Unreleased]
 
+### M4 — Web dashboard
+
+- React 19 single-page dashboard (SPEC §12) with session auth, a forced
+  password change on first login, role-based navigation and route guards for
+  every §12.1 route, light/dark themes, and uniform loading/empty/error states.
+  Server state is managed with TanStack Query; the typed API client is
+  hand-authored over the committed `schemas/openapi.json` (ADR 0007).
+- Review workspace (SPEC §12.2): keyboard-first (1–9 select outcomes, A accepts,
+  Ctrl/Cmd+Enter submits, Esc releases), model-marked case data, rule trace, a
+  suggestion card shown only when visible (outcome and rationale, never a
+  confidence), prior evaluations for resubmissions, and claim/heartbeat/
+  auto-advance with a lease-lost banner. A component test proves a blind task
+  renders no suggestion and a visible suggestion never shows a confidence.
+- Screens (SPEC §12.1): the review queue; the evaluations explorer and a detail
+  page (summary, model, screen flags, input, rule trace, model calls, audit
+  timeline, and admin legal-hold/purge); decisions with overview, rules, model
+  step, definition, versions (publish/retire with a carry-over checkbox gated on
+  matching fingerprint and rules hash), policies (propose, approve/reject under
+  four-eyes, deactivate), a dry-run test tab, and metrics; the audit view (run
+  verification, checkpoints, NDJSON export, event browser); and admin settings
+  for the workspace, API keys, members and webhooks (secrets shown once).
+- ESLint forbids `dangerouslySetInnerHTML` (SPEC §12.4).
+- Production image (SPEC §16.2): a multi-stage `Dockerfile` (Node build of the
+  SPA, then a slim Python image with `uv sync --no-dev`, a non-root user) and
+  `docker-compose.prod.yml` serve the API and the built dashboard through
+  gunicorn and WhiteNoise, with an `index.html` catch-all for SPA deep links and
+  assets under `/static/`.
+- `seed_demo` gains a `--password`/`$ADJUDIK_SEED_PASSWORD` option and a second
+  admin so the Playwright flows (reviewer completes three reviews by keyboard and
+  an auditor sees the human decision; an admin proposes a policy and a second
+  admin approves it under four-eyes) have deterministic fixtures; `make e2e-seed`
+  and `make e2e` run them against the compose stack.
+
 ### M3b — Server operations
 
 - Review queue (SPEC §8.5/§8.6): `next` (own claim or lock-the-next with

@@ -6,21 +6,25 @@ switched automation on, sends everything else to a human, and logs every step in
 tamper-evident record. See [`docs/SPEC.md`](docs/SPEC.md) for the full specification
 and [`docs/PLAN.md`](docs/PLAN.md) for the milestone checklist.
 
-> **Status: M3b (server operations).** The framework-free core loads and
-> validates decision definitions, evaluates FEEL-lite rules, runs the LLM model
-> step (providers, minimisation, injection screen, prompt, parsing, repairs,
-> retries and confidence estimation), and routes every case per the spec, with a
+> **Status: M4 (web dashboard).** The framework-free core loads and validates
+> decision definitions, evaluates FEEL-lite rules, runs the LLM model step
+> (providers, minimisation, injection screen, prompt, parsing, repairs, retries
+> and confidence estimation), and routes every case per the spec, with a
 > deterministic `demo` provider. The Django server adds the §10 data model,
 > session and API-key auth, decisions/versions (upload, validate, publish,
 > retire, carry-over, dry-run, render-prompt, acknowledge-model), manual
 > automation policies, the evaluate endpoint with its model worker and sweeper,
-> and the tamper-evident audit log (per-workspace hash chain, hourly signed
-> checkpoints, verification and NDJSON export). M3b adds the review queue
-> (claim/heartbeat/release/complete with leases and blind redaction), evaluation
+> the tamper-evident audit log (per-workspace hash chain, hourly signed
+> checkpoints, verification and NDJSON export), the review queue, evaluation
 > cancel, SSRF-safe webhooks with signed retries, decision metrics, data
-> retention/purge/legal-hold, the periodic jobs, per-key/workspace throttles,
-> CSRF, the production hardening checks and `seed_demo`. The web dashboard (M4)
-> and calibration/replay (M5/M6) are not implemented yet.
+> retention/purge/legal-hold, the periodic jobs, throttles, CSRF and the
+> production hardening checks. M4 adds the React dashboard — login and forced
+> password change, the review workspace (keyboard-first, with blind redaction),
+> the evaluations explorer and detail, decisions with their version/policy/test
+> tabs, metrics, audit, and admin settings (workspace, API keys, members,
+> webhooks) — plus a production `Dockerfile` and `docker-compose.prod.yml` that
+> serve the API and the built SPA through gunicorn and WhiteNoise. Calibration
+> and replay (M5/M6) are not implemented yet.
 
 ## Architecture
 
@@ -151,6 +155,30 @@ install the matching extra (`pip install adjudik[anthropic]`).
 Database roles (SPEC §10.3): `scripts/db-init.sql` creates `adjudik_owner`
 (migrations and tests, via `DATABASE_OWNER_URL`) and `adjudik_app` (runtime,
 via `DATABASE_URL`, least privilege). Migrations always run as the owner.
+
+### End-to-end tests
+
+The Playwright flows run against the compose stack with deterministic demo
+credentials:
+
+```bash
+make dev          # bring the stack up (separate shell)
+make e2e-seed     # seed the demo workspace with a fixed password
+make e2e          # run the Playwright flows
+```
+
+### Production image
+
+A multi-stage `Dockerfile` builds the dashboard and serves it with the API
+through gunicorn + WhiteNoise (the SPA is served for deep links; assets live
+under `/static/`). `docker-compose.prod.yml` runs the web server, the three
+Celery workers, beat, Postgres and Redis under `settings.prod`, which refuses to
+start unless every §15.7 check passes.
+
+```bash
+cp .env.prod.example .env.prod   # then replace every secret
+docker compose -f docker-compose.prod.yml up --build
+```
 
 ## License
 
